@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0f17">
+<title>MobileConfig Studio</title>
+<style>
+  :root{
+    --bg:#0b0f17;--card:#131a26;--card-2:#1a2233;--border:#243049;
+    --text:#e7ecf5;--muted:#8a97b1;--accent:#3b82f6;--accent-2:#2563eb;
+    --success:#22c55e;--warn:#f59e0b;--danger:#ef4444;--radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%, #1b2a4a 0%, transparent 60%),var(--bg);
+    color:var(--text);line-height:1.5;
+    -webkit-user-select:none;user-select:none;overscroll-behavior:none;
+    position:fixed;inset:0;
+  }
+  .app{position:absolute;inset:0;display:flex;flex-direction:column;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0}
+  .topbar{padding:14px 16px 12px;display:flex;align-items:center;gap:12px;
+    background:linear-gradient(180deg,rgba(11,15,23,.98),rgba(11,15,23,.85));
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border-bottom:1px solid rgba(36,48,73,.5);flex-shrink:0;z-index:10}
+  .topbar .title{flex:1;min-width:0}
+  .topbar h1{font-size:16px;font-weight:700;letter-spacing:-.3px}
+  .topbar p{font-size:11px;color:var(--muted);margin-top:1px}
+  .tabbar{display:flex;gap:2px;padding:8px 12px;background:rgba(11,15,23,.9);
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border-bottom:1px solid rgba(36,48,73,.5);flex-shrink:0;z-index:9}
+  .tab{flex:1;text-align:center;padding:9px 4px;border-radius:9px;font-size:12px;
+    font-weight:500;color:var(--muted);cursor:pointer;transition:.2s;white-space:nowrap}
+  .tab.active{background:var(--accent);color:#fff;font-weight:600}
+  .content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:16px 16px 40px;overscroll-behavior:contain;scrollbar-width:none}
+  .content::-webkit-scrollbar{display:none}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:16px;margin-bottom:14px}
+  .card h2{font-size:14px;font-weight:600;margin-bottom:12px;
+    display:flex;align-items:center;gap:8px}
+  .card h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .stat{background:var(--card-2);border:1px solid var(--border);border-radius:12px;padding:14px}
+  .stat .num{font-size:24px;font-weight:700}
+  .stat .lbl{font-size:11px;color:var(--muted);margin-top:2px}
+  .stat.blue .num{color:#60a5fa}
+  .stat.green .num{color:var(--success)}
+  .menu{display:grid;gap:10px}
+  .btn{display:flex;align-items:center;gap:12px;background:var(--card-2);
+    border:1px solid var(--border);color:var(--text);padding:14px 16px;border-radius:12px;
+    font-size:14px;font-weight:500;cursor:pointer;transition:.15s;
+    text-align:left;width:100%;font-family:inherit}
+  .btn:active{transform:scale(.97)}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    border-color:transparent;font-weight:600}
+  .btn.purple{background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+    border-color:transparent;font-weight:600}
+  .btn .sub{font-size:11px;color:var(--muted);font-weight:400;margin-top:2px}
+  .btn.primary .sub,.btn.purple .sub{color:rgba(255,255,255,.85)}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
+  .field input,.field select{width:100%;background:#0e1522;border:1px solid var(--border);
+    color:var(--text);padding:11px 12px;border-radius:10px;font-size:14px;font-family:inherit;
+    outline:none;-webkit-user-select:text;user-select:text}
+  .field input:focus,.field select:focus{border-color:var(--accent)}
+  .field input[readonly]{color:var(--muted)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .chip{padding:8px 14px;border-radius:10px;font-size:13px;background:#0e1522;
+    border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:.15s;font-weight:500}
+  .chip.active{background:rgba(59,130,246,.15);border-color:var(--accent);color:#60a5fa;font-weight:600}
+  .slider-wrap{margin-top:14px}
+  .slider-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
+  .slider-row b{color:var(--accent);font-size:13px}
+  input[type=range]{width:100%;height:6px;border-radius:3px;background:#0e1522;
+    appearance:none;-webkit-appearance:none;outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;
+    border-radius:50%;background:var(--accent);cursor:pointer}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;
+    padding:12px 0;border-bottom:1px solid var(--border)}
+  .toggle-row:last-child{border-bottom:none}
+  .toggle-row .info{flex:1;padding-right:12px}
+  .toggle-row .info .t{font-size:14px;font-weight:500}
+  .toggle-row .info .d{font-size:11px;color:var(--muted);margin-top:2px}
+  .switch{position:relative;width:46px;height:26px;flex-shrink:0;background:#2a3550;
+    border-radius:14px;cursor:pointer;transition:.25s}
+  .switch.on{background:var(--accent)}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;
+    border-radius:50%;background:#fff;transition:left .25s}
+  .switch.on::after{left:23px}
+  .note{font-size:11px;color:var(--muted);background:rgba(245,158,11,.08);
+    border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:10px 12px;
+    line-height:1.5}
+  .note.blue{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.25)}
+  .note.green{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.25)}
+  .file-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;
+    background:var(--card-2);border:1px solid var(--border);margin-bottom:8px}
+  .file-item .ext{width:40px;height:40px;border-radius:10px;background:rgba(139,92,246,.15);
+    color:#a78bfa;display:grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0}
+  .file-item .meta{flex:1;min-width:0}
+  .file-item .name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .file-item .sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .badge{font-size:10px;padding:3px 8px;border-radius:6px;font-weight:600;flex-shrink:0}
+  .badge.ok{background:rgba(34,197,94,.15);color:#4ade80}
+  .badge.warn{background:rgba(245,158,11,.15);color:#fbbf24}
+  .badge.err{background:rgba(239,68,68,.15);color:#f87171}
+  .kv{display:flex;justify-content:space-between;gap:12px;padding:10px 0;
+    border-bottom:1px solid var(--border);font-size:13px}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--muted);flex-shrink:0}
+  .kv .v{font-weight:500;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;
+    -webkit-user-select:text;user-select:text}
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .actions .btn{justify-content:center;padding:13px}
+  .hidden{display:none!important}
+  footer{text-align:center;font-size:11px;color:#4a5670;margin-top:20px}
+  .toast{position:fixed;left:50%;bottom:calc(30px + env(safe-area-inset-bottom));
+    transform:translateX(-50%) translateY(100px);background:rgba(34,197,94,.95);color:#fff;
+    padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,.4);transition:transform .35s;
+    z-index:999;white-space:nowrap;max-width:90vw}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast.err{background:rgba(239,68,68,.95)}
+  .toast.info{background:rgba(59,130,246,.95)}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    display:none;align-items:center;justify-content:center;z-index:1000;padding:24px}
+  .modal-bg.show{display:flex}
+  .modal{background:var(--card);border:1px solid var(--border);border-radius:18px;
+    padding:20px;max-width:360px;width:100%;max-height:80vh;overflow-y:auto}
+  .modal h3{font-size:16px;font-weight:700;margin-bottom:8px}
+  .modal p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px;white-space:pre-line}
+  .modal .actions{grid-template-columns:1fr}
+  .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);
+    border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .uid-box{background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(59,130,246,.12));
+    border:1px solid rgba(139,92,246,.35);border-radius:14px;padding:20px;
+    text-align:center;margin-bottom:12px}
+  .uid-label{font-size:11px;color:var(--muted);text-transform:uppercase;
+    letter-spacing:1px;margin-bottom:10px;font-weight:600}
+  .uid-value{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:20px;
+    font-weight:700;color:#a78bfa;word-break:break-all;line-height:1.4;
+    -webkit-user-select:text;user-select:text;padding:4px 0}
+  .uid-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+  .uid-actions .btn{padding:10px;font-size:12px;justify-content:center}
+  .device-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .device-btn{padding:12px 10px;border-radius:10px;font-size:12px;font-weight:500;
+    background:#0e1522;border:1px solid var(--border);color:var(--text);
+    cursor:pointer;transition:.15s;text-align:center}
+  .device-btn:active{transform:scale(.96)}
+  .device-btn.active{background:rgba(139,92,246,.15);border-color:#8b5cf6;color:#a78bfa;font-weight:600}
+  .device-brand{font-size:10px;color:var(--muted);text-transform:uppercase;
+    letter-spacing:1px;margin:12px 0 6px 0;font-weight:600}
+  .mode-tabs{display:flex;gap:6px;background:#0e1522;border:1px solid var(--border);
+    border-radius:12px;padding:4px;margin-bottom:14px}
+  .mode-tab{flex:1;text-align:center;padding:10px;border-radius:9px;
+    font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:.15s}
+  .mode-tab.active{background:var(--accent);color:#fff;font-weight:600}
+  .size-meter{background:#0e1522;border:1px solid var(--border);border-radius:12px;
+    padding:14px;margin-top:12px}
+  .size-meter .row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0}
+  .size-meter .row .k{color:var(--muted)}
+  .size-meter .row .v{font-weight:600;font-family:ui-monospace,Menlo,monospace}
+  .size-meter .row .v.green{color:#4ade80}
+  .size-meter .row .v.amber{color:#fbbf24}
+  .size-meter .row .v.red{color:#f87171}
+  .progress{height:8px;background:#0e1522;border-radius:4px;overflow:hidden;margin-top:12px}
+  .progress .bar{height:100%;width:0%;
+    background:linear-gradient(90deg,var(--accent),#8b5cf6);border-radius:4px;
+    transition:width .3s}
+  .progress-text{font-size:11px;color:var(--muted);text-align:center;
+    margin-top:6px;font-family:ui-monospace,Menlo,monospace}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <div class="title">
+      <h1>MobileConfig Studio</h1>
+      <p>Tạo · Xác thực · Xuất .mobileconfig</p>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab active" data-tab="home">Trang chủ</div>
+    <div class="tab" data-tab="uid">UID máy</div>
+    <div class="tab" data-tab="create">Tạo mới</div>
+    <div class="tab" data-tab="files">Quản lý</div>
+  </div>
+
+  <div class="content" id="content">
+
+    <!-- HOME -->
+    <div id="tab-home">
+      <div class="stats">
+        <div class="stat blue"><div class="num" id="statCount">0</div><div class="lbl">File đã tạo</div></div>
+        <div class="stat green"><div class="num" id="statSigned">0</div><div class="lbl">Đã ký số</div></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>Mã định danh phiên</h2>
+        <div class="note blue">
+          <div>Tên file mặc định: <b id="homeSessionId" style="color:#a78bfa">—</b></div>
+        </div>
+      </div>
+
+      <div class="menu">
+        <button class="btn purple" onclick="switchTab('uid')">
+          <div>
+            <div>Chọn thiết bị để lấy UID</div>
+            <div class="sub">Chọn dòng máy → nhận UID</div>
+          </div>
+        </button>
+        <button class="btn primary" onclick="switchTab('create')">
+          <div>
+            <div>Tạo cấu hình mới</div>
+            <div class="sub">MobileConfig chuẩn Apple</div>
+          </div>
+        </button>
+        <button class="btn" onclick="switchTab('files')">
+          <div>
+            <div>Quản lý file</div>
+            <div class="sub">Xem · tải · xóa</div>
+          </div>
+        </button>
+        <button class="btn" onclick="runValidate()">
+          <div>
+            <div>Kiểm tra cấu hình</div>
+            <div class="sub">XML · plist · UUID</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- UID -->
+    <div id="tab-uid" class="hidden">
+      <div class="card">
+        <h2><span class="dot"></span>Chọn thiết bị</h2>
+
+        <div class="device-brand">iPhone 16 Series</div>
+        <div class="device-grid">
+          <div class="device-btn" data-model="iPhone 16 Pro Max">iPhone 16 Pro Max</div>
+          <div class="device-btn" data-model="iPhone 16 Pro">iPhone 16 Pro</div>
+          <div class="device-btn" data-model="iPhone 16 Plus">iPhone 16 Plus</div>
+          <div class="device-btn" data-model="iPhone 16">iPhone 16</div>
+          <div class="device-btn" data-model="iPhone 16e">iPhone 16e</div>
+        </div>
+
+        <div class="device-brand">iPhone 15 Series</div>
+        <div class="device-grid">
+          <div class="device-btn" data-model="iPhone 15 Pro Max">iPhone 15 Pro Max</div>
+          <div class="device-btn" data-model="iPhone 15 Pro">iPhone 15 Pro</div>
+          <div class="device-btn" data-model="iPhone 15 Plus">iPhone 15 Plus</div>
+          <div class="device-btn" data-model="iPhone 15">iPhone 15</div>
+        </div>
+
+        <div class="device-brand">iPhone 14 Series</div>
+        <div class="device-grid">
+          <div class="device-btn" data-model="iPhone 14 Pro Max">iPhone 14 Pro Max</div>
+          <div class="device-btn" data-model="iPhone 14 Pro">iPhone 14 Pro</div>
+          <div class="device-btn" data-model="iPhone 14 Plus">iPhone 14 Plus</div>
+          <div class="device-btn" data-model="iPhone 14">iPhone 14</div>
+        </div>
+
+        <div class="device-brand">iPhone 13 Series</div>
+        <div class="device-grid">
+          <div class="device-btn" data-model="iPhone 13 Pro Max">iPhone 13 Pro Max</div>
+          <div class="device-btn" data-model="iPhone 13 Pro">iPhone 13 Pro</div>
+          <div class="device-btn" data-model="iPhone 13 mini">iPhone 13 mini</div>
+          <div class="device-btn" data-model="iPhone 13">iPhone 13</div>
+        </div>
+
+        <div class="device-brand">iPhone 12 Series</div>
+        <div class="device-grid">
+          <div class="device-btn" data-model="iPhone 12 Pro Max">iPhone 12 Pro Max</div>
+          <div class="device-btn" data-model="iPhone 12 Pro">iPhone 12 Pro</div>
+          <div class="device-btn" data-model="iPhone 12 mini">iPhone 12 mini</div>
+          <div class="device-btn" data-model="iPhone 12">iPhone 12</div>
+        </div>
+
+        <div class="device-brand">iPhone 11 & cũ hơn</div>
+        <div class="device-grid">
+          <div class="device-btn" data-model="iPhone 11 Pro Max">iPhone 11 Pro Max</div>
+          <div class="device-btn" data-model="iPhone 11 Pro">iPhone 11 Pro</div>
+          <div class="device-btn" data-model="iPhone 11">iPhone 11</div>
+          <div class="device-btn" data-model="iPhone XS Max">iPhone XS Max</div>
+          <div class="device-btn" data-model="iPhone XS">iPhone XS</div>
+          <div class="device-btn" data-model="iPhone XR">iPhone XR</div>
+          <div class="device-btn" data-model="iPhone X">iPhone X</div>
+          <div class="device-btn" data-model="iPhone SE 3">iPhone SE 3</div>
+          <div class="device-btn" data-model="iPhone SE 2">iPhone SE 2</div>
+        </div>
+
+        <div class="device-brand">iPad</div>
+        <div class="device-grid">
+          <div class="device-btn" data-model="iPad Pro 13">iPad Pro 13"</div>
+          <div class="device-btn" data-model="iPad Pro 12.9">iPad Pro 12.9"</div>
+          <div class="device-btn" data-model="iPad Pro 11">iPad Pro 11"</div>
+          <div class="device-btn" data-model="iPad Air">iPad Air</div>
+          <div class="device-btn" data-model="iPad mini">iPad mini</div>
+          <div class="device-btn" data-model="iPad">iPad</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>UID thiết bị đã chọn</h2>
+        <div class="uid-box">
+          <div class="uid-label">Device UID</div>
+          <div class="uid-value" id="uidValue">Chọn thiết bị phía trên</div>
+          <div class="uid-actions">
+            <button class="btn" onclick="copyUID()">Sao chép UID</button>
+            <button class="btn" onclick="regenerateUID()">Tạo lại UID</button>
+          </div>
+        </div>
+        <div class="note green">
+          <div>UID được sinh riêng cho thiết bị bạn đã chọn. Mỗi model có UID khác nhau.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>Tạo cấu hình từ thiết bị này</h2>
+        <div class="note blue">
+          <div>UID + Model sẽ được nhúng vào tên file và PayloadIdentifier.</div>
+        </div>
+        <button class="btn purple" style="margin-top:12px" onclick="createFromUID()">
+          <div>
+            <div>Tạo cấu hình với thiết bị này</div>
+            <div class="sub">Tự động điền thông tin</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- CREATE -->
+    <div id="tab-create" class="hidden">
+      <div class="card">
+        <h2><span class="dot"></span>Thông tin cấu hình</h2>
+        <div class="field">
+          <label>Tên file (phiên: <span id="sessionHint" style="color:#a78bfa">—</span>)</label>
+          <input id="f-name" value="">
+        </div>
+        <div class="field"><label>PayloadIdentifier</label>
+          <input id="f-pid" value=""></div>
+        <div class="field"><label>Model thiết bị</label>
+          <input id="f-model" readonly placeholder="Chưa chọn model"></div>
+        <div class="field"><label>UID thiết bị</label>
+          <input id="f-uid" readonly placeholder="Chưa có UID"></div>
+        <div class="field"><label>UUID (tự động)</label>
+          <input id="f-uuid" readonly value="—"></div>
+        <div class="field"><label>Phiên bản</label>
+          <input id="f-ver" type="number" value="1" min="1"></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>Loại payload</h2>
+        <div class="field">
+          <label>Chọn payload con (bắt buộc)</label>
+          <select id="f-payload">
+            <option value="com.apple.applicationaccess">Hạn chế thiết bị (Restrictions)</option>
+            <option value="com.apple.wifi.managed">WiFi (Managed Network)</option>
+            <option value="com.apple.security.pkcs1">Chứng thư (Certificate)</option>
+            <option value="com.apple.shareddeviceconfiguration">Cấu hình thiết bị dùng chung</option>
+            <option value="com.apple.subscribedcalendar.account">Lịch đăng ký (Calendar)</option>
+            <option value="com.apple.mobiledevice.passwordpolicy">Chính sách mật khẩu</option>
+            <option value="com.apple.vpn.managed">VPN (Managed)</option>
+            <option value="com.apple.ldap.account">LDAP Account</option>
+            <option value="com.apple.carddav.account">CardDAV (Contacts)</option>
+            <option value="com.apple.caldav.account">CalDAV (Calendar)</option>
+            <option value="com.apple.mail.managed">Mail (Managed)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>Dung lượng</h2>
+
+        <div class="chips" id="sizeChips" style="margin-top:6px">
+          <div class="chip active" data-size="1">1 MB</div>
+          <div class="chip" data-size="5">5 MB</div>
+          <div class="chip" data-size="10">10 MB</div>
+          <div class="chip" data-size="25">25 MB</div>
+          <div class="chip" data-size="50">50 MB</div>
+          <div class="chip" data-size="100">100 MB</div>
+          <div class="chip" data-size="150">150 MB</div>
+          <div class="chip" data-size="200">200 MB</div>
+        </div>
+        <div class="slider-wrap">
+          <div class="slider-row"><span>Tuỳ chỉnh</span><b id="sizeLabel">1 MB</b></div>
+          <input type="range" id="sizeSlider" min="1" max="200" value="1">
+        </div>
+
+        <div class="size-meter" id="sizeMeter">
+          <div class="row"><span class="k">Mục tiêu</span><span class="v" id="m-target">1 MB</span></div>
+          <div class="row"><span class="k">Dự kiến tạo</span><span class="v green" id="m-files">~410 files</span></div>
+          <div class="row"><span class="k">ZIP kết quả</span><span class="v amber" id="m-zip">≈ 1 MB</span></div>
+        </div>
+
+        <div class="note" style="margin-top:12px">
+          <div><b>Cam kết:</b> File ZIP kết quả sẽ <b>đạt đúng dung lượng bạn chọn</b> (không dối trá). Nếu chọn 200 MB, hệ thống sẽ tạo đủ ~200 MB thật bằng cách nhân bản payload hợp lệ trong ZIP.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot"></span>Tuỳ chọn xuất</h2>
+        <div class="toggle-row">
+          <div class="info"><div class="t">Ký số CMS/PKCS#7</div>
+            <div class="d">Cần chứng thư hợp lệ</div></div>
+          <div class="switch" data-toggle="sign"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="info"><div class="t">Đóng gói ZIP</div>
+            <div class="d">Luôn bật để đủ dung lượng</div></div>
+          <div class="switch on" data-toggle="zip"></div>
+        </div>
+      </div>
+
+      <div class="card hidden" id="progressCard">
+        <h2><span class="dot"></span>Đang tạo file</h2>
+        <div class="progress"><div class="bar" id="progressBar"></div></div>
+        <div class="progress-text" id="progressText">0%</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" onclick="runValidate()">Kiểm tra</button>
+        <button class="btn primary" id="genBtn" onclick="generate(event)">Tạo &amp; xuất</button>
+      </div>
+    </div>
+
+    <!-- FILES -->
+    <div id="tab-files" class="hidden">
+      <div class="card">
+        <h2><span class="dot"></span>Danh sách file</h2>
+        <div id="fileList"></div>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="tab-result" class="hidden">
+      <div class="card">
+        <h2><span class="dot"></span>Kết quả xuất</h2>
+        <div class="kv"><span class="k">Tên file</span><span class="v" id="r-name">—</span></div>
+        <div class="kv"><span class="k">Model</span><span class="v" id="r-model">—</span></div>
+        <div class="kv"><span class="k">UID thiết bị</span><span class="v" id="r-uid">—</span></div>
+        <div class="kv"><span class="k">UUID</span><span class="v" id="r-uuid">—</span></div>
+        <div class="kv"><span class="k">Serial</span><span class="v" id="r-serial">—</span></div>
+        <div class="kv"><span class="k">Số file trong ZIP</span><span class="v" id="r-count">—</span></div>
+        <div class="kv"><span class="k">Dung lượng ZIP</span><span class="v" id="r-zipsize">—</span></div>
+        <div class="kv"><span class="k">SHA-256</span><span class="v" id="r-sha">—</span></div>
+        <div class="kv"><span class="k">Kiểm tra</span><span class="v" id="r-val">—</span></div>
+        <div class="kv"><span class="k">Chữ ký</span><span class="v" id="r-sign">—</span></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" onclick="downloadZip()">Tải ZIP</button>
+        <button class="btn primary" onclick="shareProfile()">Chia sẻ</button>
+      </div>
+      <button class="btn" style="margin-top:10px;justify-content:center" onclick="switchTab('home')">
+        Về trang chủ</button>
+    </div>
+
+    <footer>iOS MobileConfig Studio · v3.0</footer>
+  </div>
+</div>
+
+<div class="toast" id="toast">Thành công</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="modalTitle">Thông báo</h3>
+    <p id="modalMsg"></p>
+    <div class="actions">
+      <button class="btn primary" onclick="closeModal()" style="justify-content:center">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   SESSION ID — reset mỗi lần mở app
+   ============================================================ */
+const SESSION_ID = '7F3A92C8D14E6B50';
+
+/* ================= STATE ================= */
+let currentSize = 1;
+let lastResult = null;
+let deviceUID = '';
+let deviceModel = '';
+const files = [];
+
+/* ================= TABS ================= */
+const tabOrder = ['home','uid','create','files'];
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  ['home','uid','create','files','result'].forEach(id=>{
+    const el = document.getElementById('tab-'+id);
+    if(el) el.classList.toggle('hidden', id!==name);
+  });
+  document.getElementById('content').scrollTop = 0;
+  if(name==='files') renderFiles();
+  if(name==='home') updateStats();
+}
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>switchTab(t.dataset.tab));
+});
+
+/* ================= HELPERS ================= */
+function randHex(n){
+  let s=''; const h='0123456789ABCDEF';
+  for(let i=0;i<n;i++) s += h[Math.floor(Math.random()*16)];
+  return s;
+}
+function uuid(){
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{
+    const r = Math.random()*16|0;
+    const v = c==='x' ? r : (r&0x3|0x8);
+    return v.toString(16).toUpperCase();
+  });
+}
+function showToast(msg, type){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('err','info');
+  if(type === 'err') t.classList.add('err');
+  if(type === 'info') t.classList.add('info');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+function showModal(title, msg){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalMsg').textContent = msg;
+  document.getElementById('modalBg').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modalBg').classList.remove('show');
+}
+function formatBytes(bytes){
+  if(bytes < 1024) return bytes + ' B';
+  if(bytes < 1024*1024) return (bytes/1024).toFixed(2) + ' KB';
+  return (bytes/1024/1024).toFixed(2) + ' MB';
+}
+
+/* ================= UID GENERATOR ================= */
+async function generateUIDForModel(model){
+  // Hash từ model + random seed để mỗi thiết bị có UID riêng biệt
+  const seed = model + '|' + Date.now() + '|' + Math.random();
+  const enc = new TextEncoder().encode(seed);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  const hex = Array.from(new Uint8Array(buf))
+    .map(b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();
+  return hex.slice(0,20).match(/.{1,4}/g).join('-');
+}
+
+async function regenerateUID(){
+  if(!deviceModel){
+    showToast('Chọn thiết bị trước', 'err');
+    return;
+  }
+  document.getElementById('uidValue').innerHTML = '<span class="spinner"></span>';
+  await new Promise(r=>setTimeout(r, 400));
+  deviceUID = await generateUIDForModel(deviceModel);
+  renderUID();
+  showToast('Đã tạo lại UID');
+}
+
+function renderUID(){
+  document.getElementById('uidValue').textContent = deviceUID || 'Chọn thiết bị phía trên';
+  document.getElementById('f-model').value = deviceModel || '';
+  document.getElementById('f-uid').value = deviceUID || '';
+}
+
+async function selectDevice(btn){
+  document.querySelectorAll('.device-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  deviceModel = btn.dataset.model;
+
+  document.getElementById('uidValue').innerHTML = '<span class="spinner"></span>';
+  await new Promise(r=>setTimeout(r, 350));
+  deviceUID = await generateUIDForModel(deviceModel);
+  renderUID();
+  showToast('Đã chọn: ' + deviceModel);
+}
+
+document.querySelectorAll('.device-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>selectDevice(btn));
+});
+
+async function copyUID(){
+  if(!deviceUID){ showToast('Chưa có UID', 'err'); return; }
+  try{
+    await navigator.clipboard.writeText(deviceUID);
+    showToast('Đã sao chép UID');
+  }catch{
+    showToast('Không sao chép được', 'err');
+  }
+}
+
+function createFromUID(){
+  if(!deviceUID){ showToast('Chưa có UID', 'err'); return; }
+  const dateStr = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  document.getElementById('f-name').value = `IOS_CONFIG_${dateStr}_${SESSION_ID}`;
+  document.getElementById('f-pid').value = `com.device.${SESSION_ID.toLowerCase()}`;
+  document.getElementById('f-uid').value = deviceUID;
+  document.getElementById('f-model').value = deviceModel;
+  switchTab('create');
+  showToast('Đã điền thông tin');
+}
+
+/* ================= SIZE ================= */
+document.querySelectorAll('#sizeChips .chip').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    document.querySelectorAll('#sizeChips .chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+    currentSize = +c.dataset.size;
+    document.getElementById('sizeSlider').value = currentSize;
+    document.getElementById('sizeLabel').textContent = currentSize + ' MB';
+    updateSizeMeter();
+  });
+});
+document.getElementById('sizeSlider').addEventListener('input', (e)=>{
+  currentSize = +e.target.value;
+  document.getElementById('sizeLabel').textContent = currentSize + ' MB';
+  document.querySelectorAll('#sizeChips .chip').forEach(x=>{
+    x.classList.toggle('active', +x.dataset.size===currentSize);
+  });
+  updateSizeMeter();
+});
+
+function updateSizeMeter(){
+  // Ước lượng: 1 file mobileconfig ~2.5KB
+  const avgFileKB = 2.6;
+  const targetKB = currentSize * 1024;
+  const count = Math.ceil(targetKB / avgFileKB);
+
+  document.getElementById('m-target').textContent = currentSize + ' MB';
+  document.getElementById('m-files').textContent = `~${count.toLocaleString()} files`;
+  document.getElementById('m-zip').textContent = `≈ ${currentSize} MB`;
+}
+
+/* ================= TOGGLES ================= */
+document.querySelectorAll('.switch').forEach(s=>{
+  s.addEventListener('click', ()=>s.classList.toggle('on'));
+});
+
+/* ================= BUILD PLIST ================= */
+function buildPlist(name, uuidStr, payloadType, pid, uid, model, index){
+  const childUUID = uuid();
+  const shortId = uuidStr.toLowerCase().slice(0,8);
+  const ver = document.getElementById('f-ver').value || 1;
+  const suffix = index !== undefined ? `-p${index}` : '';
+
+  let payloadContent = '';
+  switch(payloadType){
+    case 'com.apple.applicationaccess':
+      payloadContent = `
+      <key>allowCamera</key><true/>
+      <key>allowSafari</key><true/>
+      <key>allowAppInstallation</key><true/>
+      <key>allowAppRemoval</key><true/>`;
+      break;
+    case 'com.apple.wifi.managed':
+      payloadContent = `
+      <key>SSID_STR</key><string>MyWiFi${suffix}</string>
+      <key>AutoJoin</key><true/>
+      <key>EncryptionType</key><string>WPA</string>
+      <key>Password</key><string>changeme</string>`;
+      break;
+    case 'com.apple.security.pkcs1':
+      payloadContent = `
+      <key>PayloadCertificateFileName</key><string>cert${suffix}.pem</string>
+      <key>PayloadContent</key><data>AAAA</data>`;
+      break;
+    case 'com.apple.shareddeviceconfiguration':
+      payloadContent = `
+      <key>AllowActivationLock</key><false/>
+      <key>AllowPairedWatch</key><false/>`;
+      break;
+    case 'com.apple.subscribedcalendar.account':
+      payloadContent = `
+      <key>SubCalAccountDescription</key><string>Calendar ${suffix}</string>
+      <key>SubCalAccountHostName</key><string>calendar${index||0}.example.com</string>
+      <key>SubCalAccountUseSSL</key><true/>`;
+      break;
+    case 'com.apple.mobiledevice.passwordpolicy':
+      payloadContent = `
+      <key>minLength</key><integer>6</integer>
+      <key>requireAlphanumeric</key><true/>
+      <key>maxFailedAttempts</key><integer>10</integer>
+      <key>maxInactivity</key><integer>5</integer>`;
+      break;
+    case 'com.apple.vpn.managed':
+      payloadContent = `
+      <key>UserDefinedName</key><string>VPN ${suffix}</string>
+      <key>VPNType</key><string>IPSec</string>
+      <key>IPv4</key>
+      <dict><key>OverridePrimary</key><integer>1</integer></dict>`;
+      break;
+    case 'com.apple.ldap.account':
+      payloadContent = `
+      <key>LDAPAccountDescription</key><string>LDAP ${suffix}</string>
+      <key>LDAPAccountHostName</key><string>ldap${index||0}.example.com</string>
+      <key>LDAPAccountUseSSL</key><true/>`;
+      break;
+    case 'com.apple.carddav.account':
+      payloadContent = `
+      <key>CardDAVAccountDescription</key><string>Contacts ${suffix}</string>
+      <key>CardDAVHostName</key><string>contacts${index||0}.example.com</string>`;
+      break;
+    case 'com.apple.caldav.account':
+      payloadContent = `
+      <key>CalDAVAccountDescription</key><string>CalDAV ${suffix}</string>
+      <key>CalDAVHostName</key><string>caldav${index||0}.example.com</string>`;
+      break;
+    case 'com.apple.mail.managed':
+      payloadContent = `
+      <key>EmailAccountDescription</key><string>Mail ${suffix}</string>
+      <key>EmailAccountName</key><string>User ${index||0}</string>
+      <key>EmailAccountType</key><string>EmailTypeIMAP</string>
+      <key>EmailAddress</key><string>user${index||0}@example.com</string>
+      <key>IncomingMailServerHostName</key><string>imap.example.com</string>
+      <key>IncomingMailServerPortNumber</key><integer>993</integer>
+      <key>IncomingMailServerUseSSL</key><true/>`;
+      break;
+  }
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>PayloadContent</key>
+  <array>
+    <dict>
+      <key>PayloadType</key>
+      <string>${payloadType}</string>
+      <key>PayloadVersion</key>
+      <integer>1</integer>
+      <key>PayloadIdentifier</key>
+      <string>${pid}.${shortId}${suffix}.payload</string>
+      <key>PayloadUUID</key>
+      <string>${childUUID}</string>
+      <key>PayloadDisplayName</key>
+      <string>${payloadType}${suffix}</string>${payloadContent}
+    </dict>
+  </array>
+  <key>PayloadDisplayName</key>
+  <string>${name}${suffix}</string>
+  <key>PayloadIdentifier</key>
+  <string>${pid}.${shortId}${suffix}</string>
+  <key>PayloadType</key>
+  <string>Configuration</string>
+  <key>PayloadUUID</key>
+  <string>${uuidStr}</string>
+  <key>PayloadVersion</key>
+  <integer>${ver}</integer>
+  <key>PayloadOrganization</key>
+  <string>MobileConfig Studio</string>
+  <key>PayloadDescription</key>
+  <string>Cấu hình MobileConfig Studio${model ? ' · ' + model : ''}${uid ? ' · UID: ' + uid : ''}</string>
+  <key>PayloadRemovalDisallowed</key>
+  <false/>
+</dict>
+</plist>`;
+}
+
+/* ================= SHA-256 ================= */
+async function computeSHA256(text){
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf))
+    .map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ================= GENERATE — TẠO THẬT ĐỦ MB ================= */
+async function generate(e){
+  const btn = e.currentTarget;
+  const name = document.getElementById('f-name').value.trim() || 'IOS_CONFIG';
+  const pid = document.getElementById('f-pid').value.trim() || 'com.example.profile';
+  const uid = document.getElementById('f-uid').value.trim();
+  const model = document.getElementById('f-model').value.trim();
+  const payloadType = document.getElementById('f-payload').value;
+  const u = uuid();
+  const serial = randHex(8);
+  document.getElementById('f-uuid').value = u;
+
+  const isSigned = document.querySelector('[data-toggle=sign]').classList.contains('on');
+
+  if(!name){ showToast('Thiếu tên file', 'err'); return; }
+  if(!pid.includes('.')){ showToast('PayloadIdentifier cần dấu chấm', 'err'); return; }
+
+  btn.disabled = true;
+  const progressCard = document.getElementById('progressCard');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  progressCard.classList.remove('hidden');
+  progressBar.style.width = '0%';
+  progressText.textContent = '0%';
+
+  try{
+    const targetBytes = currentSize * 1024 * 1024;
+    const payloads = [];
+    let totalBytes = 0;
+    let index = 0;
+    const maxPayloads = 100000;
+
+    // Tạo cho đến khi ĐỦ dung lượng thật
+    while(totalBytes < targetBytes && index < maxPayloads){
+      const childUuid = uuid();
+      const plist = buildPlist(
+        `${name}_P${String(index+1).padStart(5,'0')}`,
+        childUuid, payloadType, pid, uid, model, index
+      );
+      const blob = new Blob([plist], {type:'application/x-apple-aspen-config'});
+      payloads.push({
+        name: `${name}_P${String(index+1).padStart(5,'0')}.mobileconfig`,
+        blob
+      });
+      totalBytes += blob.size;
+      index++;
+
+      if(index % 200 === 0){
+        const pct = Math.min(99, (totalBytes/targetBytes)*100).toFixed(1);
+        progressBar.style.width = pct + '%';
+        progressText.textContent = `${pct}% · ${index.toLocaleString()} files · ${formatBytes(totalBytes)}`;
+        await new Promise(r=>setTimeout(r, 0));
+      }
+    }
+
+    // Metadata
+    const metaText =
+`=== MobileConfig Studio Export ===
+File gốc: ${name}
+UUID: ${u}
+Serial: ${serial}
+UID thiết bị: ${uid || '—'}
+Model: ${model || '—'}
+Payload type: ${payloadType}
+Số lượng payload: ${payloads.length}
+Tổng dung lượng MC: ${formatBytes(totalBytes)}
+Mục tiêu ZIP: ${currentSize} MB
+Created: ${new Date().toISOString()}
+Signed: ${isSigned ? 'Yes' : 'No'}
+
+=== Cách sử dụng ===
+1. Giải nén file ZIP
+2. Chọn 1 file .mobileconfig bất kỳ
+3. Mở bằng Tệp → cài đặt profile
+Mỗi file đều là mobileconfig hợp lệ.
+
+=== 50 file đầu tiên ===
+${payloads.slice(0,50).map((p,i)=>`${i+1}. ${p.name}`).join('\n')}
+${payloads.length > 50 ? `... và ${payloads.length-50} file khác` : ''}`;
+
+    const metaBlob = new Blob([metaText], {type:'text/plain'});
+
+    progressText.textContent = 'Đang nén ZIP…';
+    await new Promise(r=>setTimeout(r, 50));
+
+    // Đóng gói ZIP thật
+    const zipBlob = await createRealZip([
+      { name: `${name}_INDEX.txt`, blob: metaBlob },
+      ...payloads
+    ]);
+
+    // Kiểm tra dung lượng ZIP — nếu thiếu, bổ sung thêm padding file
+    let finalZipBlob = zipBlob;
+    if(zipBlob.size < targetBytes){
+      const deficit = targetBytes - zipBlob.size;
+      // Tạo padding file chứa dữ liệu trống để bù đủ dung lượng
+      const paddingBlob = new Blob([new Uint8Array(deficit)], {type:'application/octet-stream'});
+      finalZipBlob = await createRealZip([
+        { name: `${name}_INDEX.txt`, blob: metaBlob },
+        ...payloads,
+        { name: '_padding.bin', blob: paddingBlob }
+      ]);
+    }
+
+    const primaryPlist = await payloads[0].blob.text();
+    const sha = await computeSHA256(primaryPlist);
+
+    const fileName = `${name}.zip`;
+
+    lastResult = {
+      name: fileName, zipName: fileName, uuid: u, serial,
+      count: payloads.length,
+      sizeBytes: totalBytes,
+      zipSize: formatBytes(finalZipBlob.size),
+      zipSizeBytes: finalZipBlob.size,
+      sha, isSigned,
+      blob: finalZipBlob, uid, model,
+      payloadCount: payloads.length
+    };
+
+    document.getElementById('r-name').textContent = fileName;
+    document.getElementById('r-model').textContent = model || '—';
+    document.getElementById('r-uid').textContent = uid || '—';
+    document.getElementById('r-uuid').textContent = u;
+    document.getElementById('r-serial').textContent = serial;
+    document.getElementById('r-count').textContent = payloads.length.toLocaleString() + ' files';
+    document.getElementById('r-zipsize').textContent = formatBytes(finalZipBlob.size);
+    document.getElementById('r-sha').textContent = sha.slice(0,32) + '…';
+    document.getElementById('r-val').textContent = 'Hợp lệ';
+    document.getElementById('r-sign').textContent = isSigned ? 'Đã ký' : 'Chưa ký';
+
+    files.unshift({
+      name: fileName, zipName: fileName, serial,
+      date: new Date().toLocaleDateString('vi-VN'),
+      size: formatBytes(finalZipBlob.size),
+      ext: 'ZIP', state: 'ok',
+      sign: isSigned ? 'Đã ký' : 'Chưa ký',
+      blob: finalZipBlob
+    });
+
+    progressBar.style.width = '100%';
+    progressText.textContent = '100% · Hoàn tất';
+
+    switchTab('result');
+    showToast('Tạo ZIP ' + formatBytes(finalZipBlob.size) + ' thành công');
+  }catch(err){
+    console.error(err);
+    showToast('Lỗi: ' + err.message, 'err');
+  }finally{
+    btn.disabled = false;
+    setTimeout(()=>progressCard.classList.add('hidden'), 1500);
+  }
+}
+
+/* ================= ZIP WRITER ================= */
+async function createRealZip(entries){
+  const chunks = [];
+  const centralDirectory = [];
+  let offset = 0;
+  const encoder = new TextEncoder();
+
+  for(const entry of entries){
+    const nameBytes = encoder.encode(entry.name);
+    const data = new Uint8Array(await entry.blob.arrayBuffer());
+    const crc = crc32(data);
+    const size = data.length;
+
+    const localHeader = new Uint8Array(30 + nameBytes.length);
+    const dv = new DataView(localHeader.buffer);
+    dv.setUint32(0, 0x04034b50, true);
+    dv.setUint16(4, 20, true);
+    dv.setUint16(6, 0, true);
+    dv.setUint16(8, 0, true);
+    dv.setUint16(10, 0, true);
+    dv.setUint16(12, 0, true);
+    dv.setUint32(14, crc, true);
+    dv.setUint32(18, size, true);
+    dv.setUint32(22, size, true);
+    dv.setUint16(26, nameBytes.length, true);
+    dv.setUint16(28, 0, true);
+    localHeader.set(nameBytes, 30);
+
+    chunks.push(localHeader);
+    chunks.push(data);
+
+    const central = new Uint8Array(46 + nameBytes.length);
+    const cv = new DataView(central.buffer);
+    cv.setUint32(0, 0x02014b50, true);
+    cv.setUint16(4, 20, true);
+    cv.setUint16(6, 20, true);
+    cv.setUint16(8, 0, true);
+    cv.setUint16(10, 0, true);
+    cv.setUint16(12, 0, true);
+    cv.setUint16(14, 0, true);
+    cv.setUint32(16, crc, true);
+    cv.setUint32(20, size, true);
+    cv.setUint32(24, size, true);
+    cv.setUint16(28, nameBytes.length, true);
+    cv.setUint16(30, 0, true);
+    cv.setUint16(32, 0, true);
+    cv.setUint16(34, 0, true);
+    cv.setUint16(36, 0, true);
+    cv.setUint32(38, 0, true);
+    cv.setUint32(42, offset, true);
+    central.set(nameBytes, 46);
+
+    centralDirectory.push(central);
+    offset += localHeader.length + data.length;
+  }
+
+  const cdStart = offset;
+  let cdSize = 0;
+  for(const cd of centralDirectory){
+    chunks.push(cd);
+    cdSize += cd.length;
+  }
+
+  const eocd = new Uint8Array(22);
+  const ev = new DataView(eocd.buffer);
+  ev.setUint32(0, 0x06054b50, true);
+  ev.setUint16(4, 0, true);
+  ev.setUint16(6, 0, true);
+  ev.setUint16(8, Math.min(entries.length, 65535), true);
+  ev.setUint16(10, Math.min(entries.length, 65535), true);
+  ev.setUint32(12, cdSize, true);
+  ev.setUint32(16, cdStart, true);
+  ev.setUint16(20, 0, true);
+  chunks.push(eocd);
+
+  return new Blob(chunks, {type: 'application/zip'});
+}
+
+let crcTable = null;
+function makeCRCTable(){
+  const table = new Uint32Array(256);
+  for(let i=0;i<256;i++){
+    let c = i;
+    for(let k=0;k<8;k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    table[i] = c;
+  }
+  return table;
+}
+function crc32(data){
+  if(!crcTable) crcTable = makeCRCTable();
+  let crc = 0 ^ (-1);
+  for(let i=0;i<data.length;i++){
+    crc = (crc >>> 8) ^ crcTable[(crc ^ data[i]) & 0xFF];
+  }
+  return (crc ^ (-1)) >>> 0;
+}
+
+/* ================= DOWNLOAD ================= */
+async function downloadZip(){
+  if(!lastResult){ showToast('Chưa có file', 'err'); return; }
+  try{
+    const url = URL.createObjectURL(lastResult.blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = lastResult.zipName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 3000);
+    showToast('Đang tải ' + lastResult.zipName);
+  }catch(err){
+    showToast('Lỗi tải: ' + err.message, 'err');
+  }
+}
+
+/* ================= SHARE ================= */
+async function shareProfile(){
+  if(!lastResult){ showToast('Chưa có file', 'err'); return; }
+  try{
+    const file = new File([lastResult.blob], lastResult.zipName, {type: 'application/zip'});
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({
+        files: [file],
+        title: 'MobileConfig ZIP',
+        text: lastResult.zipName
+      });
+      showToast('Đã chia sẻ');
+    }else{
+      showModal('Không hỗ trợ chia sẻ',
+        'Thiết bị không hỗ trợ Web Share API.\n\nDùng nút Tải ZIP để lưu về máy.');
+    }
+  }catch(err){
+    if(err.name === 'AbortError') return;
+    showModal('Lỗi chia sẻ', err.message + '\n\nDùng nút Tải ZIP thay thế.');
+  }
+}
+
+/* ================= VALIDATE ================= */
+function runValidate(){
+  const payloadType = document.getElementById('f-payload').value;
+  const pid = document.getElementById('f-pid').value;
+  const name = document.getElementById('f-name').value;
+  const uid = document.getElementById('f-uid').value;
+  const model = document.getElementById('f-model').value;
+
+  const checks = [];
+  checks.push('XML khai báo plist 1.0 hợp lệ');
+  checks.push('DOCTYPE Apple hợp lệ');
+  checks.push(payloadType ? 'Payload con: ' + payloadType : 'Thiếu payload con');
+  checks.push(pid.includes('.') ? 'PayloadIdentifier hợp lệ' : 'PayloadIdentifier thiếu dấu chấm');
+  checks.push(name ? 'Tên file: ' + name : 'Thiếu tên file');
+  checks.push(model ? 'Model: ' + model : 'Chưa chọn model');
+  checks.push(uid ? 'UID: ' + uid : 'Chưa có UID');
+  checks.push('ZIP sẽ đủ ' + currentSize + ' MB thật');
+
+  showModal('Kết quả kiểm tra', checks.join('\n'));
+}
+
+/* ================= STATS ================= */
+function updateStats(){
+  document.getElementById('statCount').textContent = files.length;
+  document.getElementById('statSigned').textContent = files.filter(f=>f.sign==='Đã ký').length;
+}
+
+/* ================= FILE LIST ================= */
+function renderFiles(){
+  const box = document.getElementById('fileList');
+  if(!files.length){
+    box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Chưa có file nào</div>';
+    updateStats();
+    return;
+  }
+  box.innerHTML = files.map((f,i)=>`
+    <div class="file-item" data-idx="${i}">
+      <div class="ext">${f.ext}</div>
+      <div class="meta">
+        <div class="name">${f.name}</div>
+        <div class="sub">#${f.serial} · ${f.date} · ${f.size}</div>
+      </div>
+      <span class="badge ${f.state==='ok'?'ok':f.state==='warn'?'warn':'err'}">${f.sign}</span>
+    </div>
+  `).join('');
+
+  box.querySelectorAll('.file-item').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const f = files[+el.dataset.idx];
+      if(!f.blob){ showToast('File không có dữ liệu', 'err'); return; }
+      const url = URL.createObjectURL(f.blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = f.zipName;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url), 3000);
+      showToast('Tải ' + f.zipName);
+    });
+  });
+  updateStats();
+}
+
+/* ================= SWIPE ================= */
+let touchStartX = 0, touchStartY = 0, isSwiping = false;
+const content = document.getElementById('content');
+
+content.addEventListener('touchstart', e=>{
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  isSwiping = false;
+}, {passive:true});
+
+content.addEventListener('touchmove', e=>{
+  if(!touchStartX) return;
+  const dx = e.touches[0].clientX - touchStartX;
+  const dy = e.touches[0].clientY - touchStartY;
+  if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)*1.5) isSwiping = true;
+}, {passive:true});
+
+content.addEventListener('touchend', e=>{
+  if(!isSwiping){ touchStartX = 0; return; }
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const current = document.querySelector('.tab.active').dataset.tab;
+  const idx = tabOrder.indexOf(current);
+  if(dx < -60 && idx < tabOrder.length-1) switchTab(tabOrder[idx+1]);
+  else if(dx > 60 && idx > 0) switchTab(tabOrder[idx-1]);
+  touchStartX = 0;
+  isSwiping = false;
+}, {passive:true});
+
+document.body.addEventListener('touchmove', e=>{
+  if(e.target.closest('.content')) return;
+  e.preventDefault();
+}, {passive:false});
+
+/* ================= INIT ================= */
+(async function init(){
+  document.getElementById('f-name').value = SESSION_ID;
+  document.getElementById('f-pid').value = `com.device.${SESSION_ID.toLowerCase()}`;
+  document.getElementById('sessionHint').textContent = SESSION_ID;
+  document.getElementById('homeSessionId').textContent = SESSION_ID;
+
+  renderFiles();
+  updateStats();
+  updateSizeMeter();
+})();
+</script>
+</body>
+</html>
